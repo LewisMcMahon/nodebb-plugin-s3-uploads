@@ -301,15 +301,19 @@ function uploadToS3(filename, err, buffer, callback) {
 			return callback(makeError(err));
 		}
 
-		var host = params.Bucket +".s3.amazonaws.com";
+		// amazon has https enabled, we use it by default
+		var host = "https://" + params.Bucket +".s3.amazonaws.com";
 		if (settings.host && 0 < settings.host.length) {
 			host = settings.host;
+			// host must start with http or https
+			if (!host.startsWith('http')) {
+				host = 'http://' + host;
+			}
 		}
 
 		callback(null, {
 			name: filename,
-			// Use protocol-less urls so that both HTTP and HTTPS work:
-			url: "//" + host + "/" + params.Key
+			url: host + "/" + params.Key
 		});
 	});
 }
