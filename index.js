@@ -24,7 +24,8 @@ var settings = {
 	"region": process.env.AWS_DEFAULT_REGION || "us-east-1",
 	"bucket": process.env.S3_UPLOADS_BUCKET || undefined,
 	"host": process.env.S3_UPLOADS_HOST || "s3.amazonaws.com",
-	"path": process.env.S3_UPLOADS_PATH || undefined
+	"path": process.env.S3_UPLOADS_PATH || undefined,
+	"signatureVersion": "v4"
 };
 
 var accessKeyIdFromDb = false;
@@ -93,6 +94,10 @@ function fetchSettings(callback) {
 				region: settings.region
 			});
 		}
+
+		AWS.config.update({
+			signatureVersion: settings.signatureVersion
+		});
 
 		if (typeof callback === "function") {
 			callback();
