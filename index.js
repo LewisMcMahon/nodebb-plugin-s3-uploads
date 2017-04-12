@@ -6,14 +6,13 @@ var AWS = require("aws-sdk"),
 	fs = require("fs"),
 	request = require("request"),
 	path = require("path"),
+	sharp = module.parent.require("sharp"),
 	winston = module.parent.require("winston"),
-	nconf = module.parent.require('nconf'),
-	gm = require("gm"),
-	im = gm.subClass({imageMagick: true}),
+	nconf = module.parent.require("nconf"),
 	meta = module.parent.require("./meta"),
 	db = module.parent.require("./database");
 
-var plugin = {}
+var plugin = {};
 
 "use strict";
 
@@ -120,14 +119,13 @@ function makeError(err) {
 }
 
 plugin.activate = function (data) {
-	if (data.id === 'nodebb-plugin-s3-uploads') {
+	if (data.id === "nodebb-plugin-s3-uploads") {
 		fetchSettings();
 	}
-
 };
 
 plugin.deactivate = function (data) {
-	if (data.id === 'nodebb-plugin-s3-uploads') {
+	if (data.id === "nodebb-plugin-s3-uploads") {
 		S3Conn = null;
 	}
 };
@@ -153,7 +151,7 @@ function renderAdmin(req, res) {
 	// Regenerate csrf token
 	var token = req.csrfToken();
 
-	var forumPath = nconf.get('url');
+	var forumPath = nconf.get("url");
 	if(forumPath.split("").reverse()[0] != "/" ){
 		forumPath = forumPath + "/";
 	}
@@ -219,7 +217,7 @@ plugin.uploadImage = function (data, callback) {
 	}
 
 	var type = image.url ? "url" : "file";
-	var allowedMimeTypes = ['image/png', 'image/jpeg', 'image/gif'];
+	var allowedMimeTypes = ["image/png", "image/jpeg", "image/gif"];
 
 	if (type === "file") {
 		if (!image.path) {
@@ -231,35 +229,27 @@ plugin.uploadImage = function (data, callback) {
 		}
 
 		fs.readFile(image.path, function (err, buffer) {
-			uploadToS3(image.name, err, buffer, callback);
+			var maxWidth = parseInt(meta.config.maximumImageWidth);
+			sharp(buffer)
+				.resize(maxWidth)
+				.withoutEnlargement()
+				.toBuffer(function(err, outputBuffer) {
+					uploadToS3(image.name, err, outputBuffer, callback);
+				});
 		});
 	}
 	else {
-		if (allowedMimeTypes.indexOf(mime.lookup(image.url)) === -1) {
-			return callback(new Error("invalid mime type"));
-		}
-		var filename = image.url.split("/").pop();
+		// We're uploading a new profile picture from an external URL
 
 		var imageDimension = parseInt(meta.config.profileImageDimension, 10) || 128;
-
-		// Resize image.
-		im(request(image.url), filename)
-			.resize(imageDimension + "^", imageDimension + "^")
-			.stream(function (err, stdout, stderr) {
-				if (err) {
-					return callback(makeError(err));
-				}
-
-				// This is sort of a hack - We"re going to stream the gm output to a buffer and then upload.
-				// See https://github.com/aws/aws-sdk-js/issues/94
-				var buf = new Buffer(0);
-				stdout.on("data", function (d) {
-					buf = Buffer.concat([buf, d]);
+		// Get the image and buffer it
+		request({url:image.url, encoding: null}, function(error, response, body) {
+			sharp(body)
+			.resize(imageDimension)
+				.toBuffer(function(err, outputBuffer) {
+					uploadToS3(image.name, err, outputBuffer, callback);
 				});
-				stdout.on("end", function () {
-					uploadToS3(filename, null, buf, callback);
-				});
-			});
+		});
 	}
 };
 

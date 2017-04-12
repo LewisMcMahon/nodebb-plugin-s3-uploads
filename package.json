@@ -21,7 +21,8 @@
   "contributors": [
     "Barış Soner Uşaklı <barisusakli@gmail.com>",
     "Joseph Chen <joseph.chen@gmail.com>",
-    "louise McMahon <louise@louisemcmahon.co.uk>"
+    "louise McMahon <louise@louisemcmahon.co.uk>",
+    "Carlos Escura <carlosescura@gmail.com>"
   ],
   "license": "MIT",
   "bugs": {
@@ -32,9 +33,12 @@
   },
   "dependencies": {
     "aws-sdk": "^2.0.23",
-    "uuid": "~1.4.1",
     "mime": "~1.2.11",
-    "request": "~2.69.0",
-    "gm": "~1.21.1"
+    "request": "~2.81.0",
+    "sharp": "^0.17.3",
+    "uuid": "~3.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^3.19.0"
   }
 }
