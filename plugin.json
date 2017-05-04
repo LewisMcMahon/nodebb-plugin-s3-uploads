@@ -5,7 +5,7 @@
     "url": "https://github.com/LewisMcMahon/nodebb-plugin-s3-uploads",
     "library": "./index.js",
     "staticDirs": {
-        "s3": "public"
+        "s3": "../../public"
     },
     "hooks": [
         { "hook": "static:app.load", "method": "load"},
