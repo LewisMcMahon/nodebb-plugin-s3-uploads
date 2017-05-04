@@ -93,7 +93,13 @@ function fetchSettings(callback) {
 				region: settings.region
 			});
 		}
-
+//http://stackoverflow.com/questions/26533245/the-authorization-mechanism-you-have-provided-is-not-supported-please-use-aws4
+// Add a signautre version v4 to fix 
+// "The authorization mechanism you have provided is not supported. Please use AWS4-HMAC-SHA256" error
+              AWS.config.update({
+                signatureVersion: 'v4'
+               });
+		
 		if (typeof callback === "function") {
 			callback();
 		}
