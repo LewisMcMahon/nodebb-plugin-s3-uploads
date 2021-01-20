@@ -6,12 +6,12 @@ var AWS = require("aws-sdk"),
 	fs = require("fs"),
 	request = require("request"),
 	path = require("path"),
-	winston = module.parent.require("winston"),
-	nconf = module.parent.require('nconf'),
+	winston = require.main.require("winston"),
+	nconf = require.main.require('nconf'),
 	gm = require("gm"),
 	im = gm.subClass({imageMagick: true}),
-	meta = module.parent.require("./meta"),
-	db = module.parent.require("./database");
+	meta = require.main.require("./src/meta"),
+	db = require.main.require("./src/database");
 
 var plugin = {}
 
